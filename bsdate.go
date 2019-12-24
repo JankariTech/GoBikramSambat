@@ -154,17 +154,30 @@ var calendardata = map[int][13]int {
 	2100: [13]int{17, 31, 32, 31, 32, 30, 31, 30, 29, 30, 29, 30, 30},
 }
 
+var MonthNames = [12]string{
+	"Baisakh", "Jestha", "Ashadh", "Shrawan", "Bhadra", "Ashwin", "Kartik",
+	"Mangsir", "Paush", "Mangh", "Falgun", "Chaitra",
+}
 
-func New(Day, Month, Year int) (Date, error) {
-
+func New(Day int, Month interface{}, Year int) (Date, error) {
+	var MonthInt int
+	switch Month.(type) {
+	case string:
+		for i, v := range MonthNames {
+			if v == Month.(string) {
+				MonthInt = i + 1
+				break
+			}
+		}
+	case int:
+		MonthInt = Month.(int)
+	default:
+		return nil, errors.New("month has to be of value int or string")
+	}
 	d := date{
 		Day:   Day,
-		Month: Month,
+		Month: MonthInt,
 		Year:  Year,
-		MonthNames: [12]string{
-			"Baisakh", "Jestha", "Ashadh", "Shrawan", "Bhadra", "Ashwin", "Kartik",
-			"Mangsir", "Paush", "Mangh", "Falgun", "Chaitra",
-		},
 	}
 	if !d.isValid() {
 		return nil, errors.New("not a valid date")
