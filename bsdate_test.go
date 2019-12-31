@@ -3,7 +3,9 @@ package bsdate
 import (
 	"github.com/magiconair/properties/assert"
 	"strconv"
+	"strings"
 	"testing"
+	"time"
 )
 
 type TestDateStruc struct {
@@ -18,6 +20,11 @@ type TestDateStrucWithMonthNames struct {
 	month            string
 	expectedMonthNum int
 	year             int
+}
+
+type TestDateConversionStruc struct {
+	bsDate        string
+	gregorianDate string
 }
 
 var validDates = []TestDateStruc{
@@ -58,6 +65,30 @@ var invalidDates = []TestDateStruc{
 	{12, 31, "", 2067}, //this month has only 30 days
 }
 
+var convertedDates = []TestDateConversionStruc{
+	{"2068-04-01", "2011-07-17"}, //a random date
+	{"2068-01-01", "2011-04-14"}, //1st Basakh
+	{"2037-11-28", "1981-03-11"},
+	{"2038-09-17", "1982-01-01"}, //1st Jan
+	{"2040-09-17", "1984-01-01"}, //1st Jan in a leap year
+	{"2040-09-18", "1984-01-02"}, //second Jan in a leap year
+	{"2041-09-17", "1984-12-31"}, //31th Dec in a leap year
+	{"2041-09-18", "1985-01-01"}, //1st Jan after a leap year
+	{"2068-09-01", "2011-12-16"}, //1st Paush
+	{"2068-08-29", "2011-12-15"}, //last day before first Paush
+	{"2068-09-20", "2012-01-04"},
+	{"2077-08-30", "2020-12-15"}, //last day before first Paush in a leap year
+	{"2077-09-16", "2020-12-31"}, //31th Dec in a later leap year
+	{"2074-09-16", "2017-12-31"}, //31th Dec in a non leap year
+	{"2077-09-17", "2021-01-01"}, //1st Jan after a leap year
+	{"2077-09-01", "2020-12-16"}, //1st Paush in a leap year
+	{"2076-11-17", "2020-02-29"}, //29th Febr in a leap year
+	{"2076-11-18", "2020-03-01"}, //1st March in a leap year
+	{"2075-11-16", "2019-02-28"}, //28th Febr in a non leap year
+	{"2076-02-01", "2019-05-15"}, //start of a month with 32 days
+	{"2076-02-32", "2019-06-15"}, //end of a month with 32 days
+	{"2076-03-01", "2019-06-16"}, //a month after a month with 32 days
+}
 func TestValidBSDates(t *testing.T) {
 	for _, testCase := range validDates {
 		t.Run(strconv.Itoa(testCase.year)+"-"+strconv.Itoa(testCase.month)+"-"+strconv.Itoa(testCase.day), func(t *testing.T) {
@@ -104,4 +135,22 @@ func TestInvalidMonthType(t *testing.T) {
 	nepaliDate, err := New(1, 2.345, 2076)
 	assert.Equal(t, err.Error(), "month has to be of value int or string")
 	assert.Equal(t, nepaliDate, nil)
+}
+
+func TestConversionToGregorian(t *testing.T) {
+	for _, testCase := range convertedDates {
+		t.Run(testCase.bsDate, func(t *testing.T) {
+			var splitedBSDate = strings.Split(testCase.bsDate, "-")
+			var bsDay, _ = strconv.Atoi(splitedBSDate[2])
+			var bsMonth, _ = strconv.Atoi(splitedBSDate[1])
+			var bsYear, _ = strconv.Atoi(splitedBSDate[0])
+			nepaliDate, err := New(bsDay, bsMonth, bsYear)
+			assert.Equal(t, err, nil)
+
+			var convertedGregorianDate = nepaliDate.getGregorianDate()
+			expectedGregorianDate, _ := time.Parse("2006-01-02", testCase.gregorianDate)
+			assert.Equal(t, convertedGregorianDate, expectedGregorianDate)
+		})
+
+	}
 }

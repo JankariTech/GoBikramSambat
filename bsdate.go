@@ -1,12 +1,16 @@
 package bsdate
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 type Date interface {
 	GetDay() int
 	GetMonth() int
 	GetYear() int
 	GetMonthName() string
+	getGregorianDate() time.Time
 }
 type date struct {
 	Day        int
@@ -216,4 +220,60 @@ func (d date) isValid() bool {
 		return false
 	}
 	return true
+}
+
+func (d date) getGregorianDate() time.Time  {
+	var daysAfterJanFirstOfGregorianYear = 0 //we will add all the days that went by since the 1st.
+	                                         //January and then we can get the gregorian Date
+	var gregorianYear int
+	var nepaliMonthToCheck  = d.Month
+	var nepaliYearToCheck  = d.Year
+
+
+	//get the correct year
+	//after the month of Paush (9) or in Paush but after 1st Jan in that BS year we have to subtract 56 years, else 57
+	if d.Month > 9 || (d.Month == 9 && d.Day >= calendardata[d.Year][0]) {
+		gregorianYear = d.Year - 56
+	} else {
+		gregorianYear = d.Year - 57
+	}
+
+	//first we add the amount of days in the actual BS month as the day of year in the gregorian one
+	//because at least this days are gone since the 1st. Jan.
+	if d.Month != 9 {
+		daysAfterJanFirstOfGregorianYear = d.Day
+		nepaliMonthToCheck--
+	}
+
+	//now we loop through all nepali months and add the amount of days to daysAfterJanFirstOfGregorianYear
+	//we do this till we reach Paush (9th month). 1st. January always falls in this month
+	for ; nepaliMonthToCheck != 9 ;nepaliMonthToCheck-- {
+		if nepaliMonthToCheck <= 0 {
+			nepaliMonthToCheck = 12
+			nepaliYearToCheck--
+		}
+		daysAfterJanFirstOfGregorianYear += calendardata[nepaliYearToCheck][nepaliMonthToCheck]
+	}
+
+	//If the date that has to be converted is in Paush (month no. 9) we have to do some other calculation
+	if d.Month == 9 {
+		//add the days that are passed since the first day of Paush and substract the amount of days that lie between
+		//1st. Jan and 1st Paush
+		daysAfterJanFirstOfGregorianYear += d.Day - calendardata[nepaliYearToCheck][0]
+
+		//for the first days of Paush we have now negative values
+		//so we calculate daysAfterJanFirstOfGregorianYear for the previous year
+		//last-day of the year (365 or 366) plus the negative daysAfterJanFirstOfGregorianYear value
+		if daysAfterJanFirstOfGregorianYear < 0 {
+			year := time.Date(gregorianYear, time.December, 31, 0, 0, 0, 0, time.UTC)
+			daysAfterJanFirstOfGregorianYear = year.YearDay() + daysAfterJanFirstOfGregorianYear
+		}
+	} else {
+		//add the days of Paush that are after 1st Jan
+		daysAfterJanFirstOfGregorianYear += calendardata[nepaliYearToCheck][9] - calendardata[nepaliYearToCheck][0]
+	}
+
+	gregorianDate := time.Date(gregorianYear,1,1,0,0,0,0,time.UTC)
+	gregorianDate = gregorianDate.AddDate(0,0, daysAfterJanFirstOfGregorianYear)
+	return gregorianDate
 }
