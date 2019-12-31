@@ -1,0 +1,9 @@
+language: go
+go:
+ - 1.13
+ - 1.12
+ - 1.11
+ - tip
+
+script:
+ - go test -v
