@@ -190,6 +190,54 @@ func New(Day int, Month interface{}, Year int) (Date, error) {
 	return d, nil
 }
 
+func NewFromGregorian(gregorianDay, gregorianMonth, gregorianYear int) (Date, error) {
+	var bsYear = gregorianYear + 56         //first rough calculation, might become 57 later
+	var bsMonth = 9                         //Jan 1 always fall in BS month Paush which is the 9th month
+	var daysSinceJanFirstToEndOfBsMonth int //days calculated from 1st Jan till the end of the actual BS month,
+	                                        // we use this value to check if the gregorian Date is in the actual BS month
+
+	year := time.Date(gregorianYear, time.Month(gregorianMonth), gregorianDay, 0, 0, 0, 0, time.UTC)
+	var gregorianDayOfYear = year.YearDay()
+
+	//get the BS day in Paush (month 9) of 1st January
+	var dayOfFirstJanInPaush = calendardata[bsYear][0]
+
+	//check how many days are left of Paush
+	daysSinceJanFirstToEndOfBsMonth = calendardata[bsYear][bsMonth] - dayOfFirstJanInPaush + 1
+
+	//If the gregorian day-of-year is smaller or equal to the sum of days between the 1st January and
+	//the end of the actual BS month we found the correct nepali month.
+	//Example:
+	//The 4th February 2011 is the gregorianDayOfYear 35 (31 days of January + 4)
+	//1st January 2011 is in the BS year 2067 and its the 17th day of Paush (9th month)
+	//In 2067 Paush had 30days, This means (30-17+1=14) there are 14days between 1st January and end of Paush
+	//(including 17th January)
+	//The gregorianDayOfYear (35) is bigger than 14, so we check the next month
+	//The next BS month (Mangh) has 29 days
+	//29+14=43, this is bigger than gregorianDayOfYear(35) so, we found the correct nepali month
+	for ; gregorianDayOfYear > daysSinceJanFirstToEndOfBsMonth; {
+		bsMonth++
+		if bsMonth > 12 {
+			bsMonth = 1
+			bsYear++
+		}
+		daysSinceJanFirstToEndOfBsMonth += calendardata[bsYear][bsMonth]
+	}
+
+	//the last step is to calculate the nepali day-of-month
+	//We know the correct BS month, and we know the days since 1st Jan till the end of this month.
+	//Subtracting the day-of-the-year of the gregorian calendar from the days since 1st Jan till the end of the correct
+	//BS month will give us the amount of days between the searched day and the end of the BS month.
+	//Subtracting that number from the amount of days in the BS month should bring us to the correct date.
+	//to continue our example from before:
+	//we calculated there are 43 days from 1st. January (17 Paush) till end of Mangh (29 days)
+	//when we subtract from this 43days the day-of-year of the the gregorian date (35), we know how far the searched day is away
+	//from the end of the nepali month. So we simply subtract this number from the amount of days in this month (30)
+	var bsDay = calendardata[bsYear][bsMonth] - (daysSinceJanFirstToEndOfBsMonth - gregorianDayOfYear)
+
+	return New(bsDay, bsMonth, bsYear)
+}
+
 func (d date) GetDay() int {
 	return d.Day
 }
