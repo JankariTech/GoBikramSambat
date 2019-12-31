@@ -6,6 +6,7 @@ type Date interface {
 	GetDay() int
 	GetMonth() int
 	GetYear() int
+	GetMonthName() string
 }
 type date struct {
 	Day        int
@@ -196,6 +197,11 @@ func (d date) GetMonth() int {
 func (d date) GetYear() int {
 	return d.Year
 }
+
+func (d date) GetMonthName() string {
+	return MonthNames[d.Month-1]
+}
+
 func (d date) isValid() bool {
 	//some rough testing
 	if d.Day <= 0 || d.Day > 32 || d.Month <= 0 || d.Month > 12 || d.Year <= 0 {

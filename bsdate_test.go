@@ -7,9 +7,10 @@ import (
 )
 
 type TestDateStruc struct {
-	day   int
-	month int
-	year  int
+	day               int
+	month             int
+	expectedMonthName string
+	year              int
 }
 
 type TestDateStrucWithMonthNames struct {
@@ -20,10 +21,10 @@ type TestDateStrucWithMonthNames struct {
 }
 
 var validDates = []TestDateStruc{
-	{1, 1, 1970},
-	{1, 1, 2076},
-	{3, 2, 2074},
-	{30, 12, 2100},
+	{1, 1, "Baisakh", 1970},
+	{1, 1, "Baisakh", 2076},
+	{3, 2, "Jestha", 2074},
+	{30, 12, "Chaitra", 2100},
 }
 
 var validDatesWithMonthNames = []TestDateStrucWithMonthNames{
@@ -42,19 +43,19 @@ var validDatesWithMonthNames = []TestDateStrucWithMonthNames{
 }
 
 var invalidDates = []TestDateStruc{
-	{1, 1, 0000},
-	{0, 2, 2074},
-	{10, 0, 2074},
-	{000, 2, 2074},
-	{-1, 2, 2074},
-	{1, -1, 2074},
-	{1, 2, -1},
-	{33, 2, 2074},
-	{1, 13, 2074},
-	{1, 1, 1969},   //no data before BS 1970
-	{1, 1, 2101},   //no data after BS 2100
-	{1, 32, 2076},  //this month has only 31 days
-	{12, 31, 2067}, //this month has only 30 days
+	{1, 1, "", 0000},
+	{0, 2, "", 2074},
+	{10, 0, "", 2074},
+	{000, 2, "", 2074},
+	{-1, 2, "", 2074},
+	{1, -1, "", 2074},
+	{1, 2, "", -1},
+	{33, 2, "", 2074},
+	{1, 13, "", 2074},
+	{1, 1, "", 1969},   //no data before BS 1970
+	{1, 1, "", 2101},   //no data after BS 2100
+	{1, 32, "", 2076},  //this month has only 31 days
+	{12, 31, "", 2067}, //this month has only 30 days
 }
 
 func TestValidBSDates(t *testing.T) {
@@ -64,6 +65,7 @@ func TestValidBSDates(t *testing.T) {
 			assert.Equal(t, err, nil)
 			assert.Equal(t, nepaliDate.GetDay(), testCase.day)
 			assert.Equal(t, nepaliDate.GetMonth(), testCase.month)
+			assert.Equal(t, nepaliDate.GetMonthName(), testCase.expectedMonthName)
 			assert.Equal(t, nepaliDate.GetYear(), testCase.year)
 		})
 	}
@@ -76,6 +78,7 @@ func TestValidBSDatesWithMonthNames(t *testing.T) {
 			assert.Equal(t, err, nil)
 			assert.Equal(t, nepaliDate.GetDay(), testCase.day)
 			assert.Equal(t, nepaliDate.GetMonth(), testCase.expectedMonthNum)
+			assert.Equal(t, nepaliDate.GetMonthName(), testCase.month)
 			assert.Equal(t, nepaliDate.GetYear(), testCase.year)
 		})
 	}
