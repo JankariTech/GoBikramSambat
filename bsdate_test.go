@@ -154,3 +154,25 @@ func TestConversionToGregorian(t *testing.T) {
 
 	}
 }
+
+func TestCreateFromGregorian(t *testing.T) {
+	for _, testCase := range convertedDates {
+		t.Run(testCase.bsDate, func(t *testing.T) {
+			var splitedBSDate = strings.Split(testCase.bsDate, "-")
+			var expectedBsDay, _ = strconv.Atoi(splitedBSDate[2])
+			var expectedBsMonth, _ = strconv.Atoi(splitedBSDate[1])
+			var expectedBsYear, _ = strconv.Atoi(splitedBSDate[0])
+
+			var splitedGregorianDate = strings.Split(testCase.gregorianDate, "-")
+			var gregorianDay, _ = strconv.Atoi(splitedGregorianDate[2])
+			var gregorianMonth, _ = strconv.Atoi(splitedGregorianDate[1])
+			var gregorianYear, _ = strconv.Atoi(splitedGregorianDate[0])
+
+			nepaliDate, err := NewFromGregorian(gregorianDay, gregorianMonth, gregorianYear)
+			assert.Equal(t, err, nil)
+			assert.Equal(t, nepaliDate.GetDay(), expectedBsDay)
+			assert.Equal(t, nepaliDate.GetMonth(), expectedBsMonth)
+			assert.Equal(t, nepaliDate.GetYear(), expectedBsYear)
+		})
+	}
+}
