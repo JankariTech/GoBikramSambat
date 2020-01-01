@@ -10,7 +10,7 @@ type Date interface {
 	GetMonth() int
 	GetYear() int
 	GetMonthName() string
-	getGregorianDate() time.Time
+	GetGregorianDate() time.Time
 }
 type date struct {
 	Day        int
@@ -270,7 +270,7 @@ func (d date) isValid() bool {
 	return true
 }
 
-func (d date) getGregorianDate() time.Time  {
+func (d date) GetGregorianDate() time.Time  {
 	var daysAfterJanFirstOfGregorianYear = 0 //we will add all the days that went by since the 1st.
 	                                         //January and then we can get the gregorian Date
 	var gregorianYear int

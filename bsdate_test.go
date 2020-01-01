@@ -147,7 +147,7 @@ func TestConversionToGregorian(t *testing.T) {
 			nepaliDate, err := New(bsDay, bsMonth, bsYear)
 			assert.Equal(t, err, nil)
 
-			var convertedGregorianDate = nepaliDate.getGregorianDate()
+			var convertedGregorianDate = nepaliDate.GetGregorianDate()
 			expectedGregorianDate, _ := time.Parse("2006-01-02", testCase.gregorianDate)
 			assert.Equal(t, convertedGregorianDate, expectedGregorianDate)
 		})
