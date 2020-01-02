@@ -10,7 +10,7 @@ type Date interface {
 	GetMonth() int
 	GetYear() int
 	GetMonthName() string
-	GetGregorianDate() time.Time
+	GetGregorianDate() (time.Time, error)
 }
 type date struct {
 	Day        int
@@ -270,7 +270,7 @@ func (d date) isValid() bool {
 	return true
 }
 
-func (d date) GetGregorianDate() time.Time  {
+func (d date) GetGregorianDate() (time.Time, error)  {
 	var daysAfterJanFirstOfGregorianYear = 0 //we will add all the days that went by since the 1st.
 	                                         //January and then we can get the gregorian Date
 	var gregorianYear int
@@ -299,6 +299,10 @@ func (d date) GetGregorianDate() time.Time  {
 		if nepaliMonthToCheck <= 0 {
 			nepaliMonthToCheck = 12
 			nepaliYearToCheck--
+			//do we have data of that year?
+			if _, ok := calendardata[nepaliYearToCheck]; !ok {
+				return time.Time{}, errors.New("cannot convert date, missing data")
+			}
 		}
 		daysAfterJanFirstOfGregorianYear += calendardata[nepaliYearToCheck][nepaliMonthToCheck]
 	}
@@ -323,5 +327,5 @@ func (d date) GetGregorianDate() time.Time  {
 
 	gregorianDate := time.Date(gregorianYear,1,1,0,0,0,0,time.UTC)
 	gregorianDate = gregorianDate.AddDate(0,0, daysAfterJanFirstOfGregorianYear)
-	return gregorianDate
+	return gregorianDate, nil
 }
