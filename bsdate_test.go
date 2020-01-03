@@ -141,10 +141,7 @@ func TestInvalidMonthType(t *testing.T) {
 func TestConversionToGregorian(t *testing.T) {
 	for _, testCase := range convertedDates {
 		t.Run(testCase.bsDate, func(t *testing.T) {
-			var splitedBSDate = strings.Split(testCase.bsDate, "-")
-			var bsDay, _ = strconv.Atoi(splitedBSDate[2])
-			var bsMonth, _ = strconv.Atoi(splitedBSDate[1])
-			var bsYear, _ = strconv.Atoi(splitedBSDate[0])
+			var bsYear, bsMonth, bsDay = splitDateString(testCase.bsDate)
 			nepaliDate, err := New(bsDay, bsMonth, bsYear)
 			assert.Equal(t, err, nil)
 
@@ -164,11 +161,7 @@ var impossibleToConvertToGregorianDates = [] string {
 func TestConversionInvalidToGregorian(t *testing.T) {
 	for _, testCase := range impossibleToConvertToGregorianDates {
 		t.Run(testCase, func(t *testing.T) {
-			var splitedBSDate = strings.Split(testCase, "-")
-			var bsDay, _ = strconv.Atoi(splitedBSDate[2])
-			var bsMonth, _ = strconv.Atoi(splitedBSDate[1])
-			var bsYear, _ = strconv.Atoi(splitedBSDate[0])
-
+			var bsYear, bsMonth, bsDay = splitDateString(testCase)
 			nepaliDate, err := New(bsDay, bsMonth, bsYear)
 			assert.Equal(t, err, nil)
 			var convertedGregorianDate time.Time
@@ -183,16 +176,8 @@ func TestConversionInvalidToGregorian(t *testing.T) {
 func TestCreateFromGregorian(t *testing.T) {
 	for _, testCase := range convertedDates {
 		t.Run(testCase.bsDate, func(t *testing.T) {
-			var splitedBSDate = strings.Split(testCase.bsDate, "-")
-			var expectedBsDay, _ = strconv.Atoi(splitedBSDate[2])
-			var expectedBsMonth, _ = strconv.Atoi(splitedBSDate[1])
-			var expectedBsYear, _ = strconv.Atoi(splitedBSDate[0])
-
-			var splitedGregorianDate = strings.Split(testCase.gregorianDate, "-")
-			var gregorianDay, _ = strconv.Atoi(splitedGregorianDate[2])
-			var gregorianMonth, _ = strconv.Atoi(splitedGregorianDate[1])
-			var gregorianYear, _ = strconv.Atoi(splitedGregorianDate[0])
-
+			var expectedBsYear, expectedBsMonth, expectedBsDay = splitDateString(testCase.bsDate)
+			var gregorianYear, gregorianMonth, gregorianDay = splitDateString(testCase.gregorianDate)
 			nepaliDate, err := NewFromGregorian(gregorianDay, gregorianMonth, gregorianYear)
 			assert.Equal(t, err, nil)
 			assert.Equal(t, nepaliDate.GetDay(), expectedBsDay)
@@ -200,4 +185,12 @@ func TestCreateFromGregorian(t *testing.T) {
 			assert.Equal(t, nepaliDate.GetYear(), expectedBsYear)
 		})
 	}
+}
+
+func splitDateString(dateString string) (year int, month int, day int) {
+	var splitedDate = strings.Split(dateString, "-")
+	day, _ = strconv.Atoi(splitedDate[2])
+	month, _ = strconv.Atoi(splitedDate[1])
+	year, _ = strconv.Atoi(splitedDate[0])
+	return
 }
