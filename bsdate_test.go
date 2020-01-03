@@ -88,7 +88,7 @@ var convertedDates = []TestDateConversionStruc{
 	{"2076-02-01", "2019-05-15"}, //start of a month with 32 days
 	{"2076-02-32", "2019-06-15"}, //end of a month with 32 days
 	{"2076-03-01", "2019-06-16"}, //a month after a month with 32 days
-	{"2100-12-30", "2044-04-12"},
+	{"2100-12-30", "2044-04-12"}, //last day, we can convert in both directions
 }
 func TestValidBSDates(t *testing.T) {
 	for _, testCase := range validDates {
@@ -183,6 +183,25 @@ func TestCreateFromGregorian(t *testing.T) {
 			assert.Equal(t, nepaliDate.GetDay(), expectedBsDay)
 			assert.Equal(t, nepaliDate.GetMonth(), expectedBsMonth)
 			assert.Equal(t, nepaliDate.GetYear(), expectedBsYear)
+		})
+	}
+}
+
+var impossibleToConvertFromGregorianDates = [] string {
+	"1913-09-01", //1913 and before cannot be converted, because 1913+56=1969 and we do not have data for that BS year
+	"1913-12-31",
+	"2045-01-01", //2045 and after cannot be converted because 2045+56=2101 and we do not have data for that BS year
+	"2045-05-01",
+	"2044-04-13", //this date would be BS 2101-01-01  and we do not have data for that BS year
+}
+func TestCreateFromInvalidGregorian(t *testing.T) {
+	for _, testCase := range impossibleToConvertFromGregorianDates {
+		t.Run(testCase, func(t *testing.T) {
+
+			var gregorianYear, gregorianMonth, gregorianDay = splitDateString(testCase)
+			bsDate, err := NewFromGregorian(gregorianDay, gregorianMonth, gregorianYear)
+			assert.Equal(t, err.Error(), "cannot convert date, missing data")
+			assert.Equal(t, bsDate, nil)
 		})
 	}
 }
