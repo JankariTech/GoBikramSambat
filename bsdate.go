@@ -196,6 +196,10 @@ func NewFromGregorian(gregorianDay, gregorianMonth, gregorianYear int) (Date, er
 	var daysSinceJanFirstToEndOfBsMonth int //days calculated from 1st Jan till the end of the actual BS month,
 	                                        // we use this value to check if the gregorian Date is in the actual BS month
 
+	if _, ok := calendardata[bsYear]; !ok {
+		return nil, errors.New("cannot convert date, missing data")
+	}
+
 	year := time.Date(gregorianYear, time.Month(gregorianMonth), gregorianDay, 0, 0, 0, 0, time.UTC)
 	var gregorianDayOfYear = year.YearDay()
 
@@ -220,6 +224,9 @@ func NewFromGregorian(gregorianDay, gregorianMonth, gregorianYear int) (Date, er
 		if bsMonth > 12 {
 			bsMonth = 1
 			bsYear++
+			if _, ok := calendardata[bsYear]; !ok {
+				return nil, errors.New("cannot convert date, missing data")
+			}
 		}
 		daysSinceJanFirstToEndOfBsMonth += calendardata[bsYear][bsMonth]
 	}
