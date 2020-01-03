@@ -61,8 +61,8 @@ var invalidDates = []TestDateStruc{
 	{1, 13, "", 2074},
 	{1, 1, "", 1969},   //no data before BS 1970
 	{1, 1, "", 2101},   //no data after BS 2100
-	{1, 32, "", 2076},  //this month has only 31 days
-	{12, 31, "", 2067}, //this month has only 30 days
+	{32, 1, "", 2076},  //this month has only 31 days
+	{31, 12, "", 2067}, //this month has only 30 days
 }
 
 var convertedDates = []TestDateConversionStruc{
