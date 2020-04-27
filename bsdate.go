@@ -2,6 +2,7 @@ package bsdate
 
 import (
 	"errors"
+	"reflect"
 	"time"
 )
 
@@ -19,9 +20,8 @@ type date struct {
 	MonthNames [12]string
 }
 
-
 // nepali year : day in Paush for 1st Jan, no of days in Baisakh, no of days in Jestha, no of days in Ashadh, ..
-var calendardata = map[int][13]int {
+var calendardata = map[int][13]int{
 	1970: [13]int{18, 31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30},
 	1971: [13]int{18, 31, 31, 32, 31, 32, 30, 30, 29, 30, 29, 30, 30},
 	1972: [13]int{17, 31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 30},
@@ -194,7 +194,7 @@ func NewFromGregorian(gregorianDay, gregorianMonth, gregorianYear int) (Date, er
 	var bsYear = gregorianYear + 56         //first rough calculation, might become 57 later
 	var bsMonth = 9                         //Jan 1 always fall in BS month Paush which is the 9th month
 	var daysSinceJanFirstToEndOfBsMonth int //days calculated from 1st Jan till the end of the actual BS month,
-	                                        // we use this value to check if the gregorian Date is in the actual BS month
+	// we use this value to check if the gregorian Date is in the actual BS month
 
 	if _, ok := calendardata[bsYear]; !ok {
 		return nil, errors.New("cannot convert date, missing data")
@@ -219,7 +219,7 @@ func NewFromGregorian(gregorianDay, gregorianMonth, gregorianYear int) (Date, er
 	//The gregorianDayOfYear (35) is bigger than 14, so we check the next month
 	//The next BS month (Mangh) has 29 days
 	//29+14=43, this is bigger than gregorianDayOfYear(35) so, we found the correct nepali month
-	for ; gregorianDayOfYear > daysSinceJanFirstToEndOfBsMonth; {
+	for gregorianDayOfYear > daysSinceJanFirstToEndOfBsMonth {
 		bsMonth++
 		if bsMonth > 12 {
 			bsMonth = 1
@@ -266,6 +266,9 @@ func (d date) isValid() bool {
 	if d.Day <= 0 || d.Day > 32 || d.Month <= 0 || d.Month > 12 || d.Year <= 0 {
 		return false
 	}
+	if reflect.TypeOf(d.Day) == reflect.TypeOf("string") || reflect.TypeOf(d.Month) == reflect.TypeOf("string") || reflect.TypeOf(d.Year) == reflect.TypeOf("string") {
+		return false
+	}
 	//do we have data of that year?
 	if _, ok := calendardata[d.Year]; !ok {
 		return false
@@ -277,13 +280,12 @@ func (d date) isValid() bool {
 	return true
 }
 
-func (d date) GetGregorianDate() (time.Time, error)  {
+func (d date) GetGregorianDate() (time.Time, error) {
 	var daysAfterJanFirstOfGregorianYear = 0 //we will add all the days that went by since the 1st.
-	                                         //January and then we can get the gregorian Date
+	//January and then we can get the gregorian Date
 	var gregorianYear int
-	var nepaliMonthToCheck  = d.Month
-	var nepaliYearToCheck  = d.Year
-
+	var nepaliMonthToCheck = d.Month
+	var nepaliYearToCheck = d.Year
 
 	//get the correct year
 	//after the month of Paush (9) or in Paush but after 1st Jan in that BS year we have to subtract 56 years, else 57
@@ -302,7 +304,7 @@ func (d date) GetGregorianDate() (time.Time, error)  {
 
 	//now we loop through all nepali months and add the amount of days to daysAfterJanFirstOfGregorianYear
 	//we do this till we reach Paush (9th month). 1st. January always falls in this month
-	for ; nepaliMonthToCheck != 9 ;nepaliMonthToCheck-- {
+	for ; nepaliMonthToCheck != 9; nepaliMonthToCheck-- {
 		if nepaliMonthToCheck <= 0 {
 			nepaliMonthToCheck = 12
 			nepaliYearToCheck--
@@ -332,7 +334,7 @@ func (d date) GetGregorianDate() (time.Time, error)  {
 		daysAfterJanFirstOfGregorianYear += calendardata[nepaliYearToCheck][9] - calendardata[nepaliYearToCheck][0]
 	}
 
-	gregorianDate := time.Date(gregorianYear,1,1,0,0,0,0,time.UTC)
-	gregorianDate = gregorianDate.AddDate(0,0, daysAfterJanFirstOfGregorianYear)
+	gregorianDate := time.Date(gregorianYear, 1, 1, 0, 0, 0, 0, time.UTC)
+	gregorianDate = gregorianDate.AddDate(0, 0, daysAfterJanFirstOfGregorianYear)
 	return gregorianDate, nil
 }
