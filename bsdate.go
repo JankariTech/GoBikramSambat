@@ -2,7 +2,6 @@ package bsdate
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"time"
 )
@@ -270,8 +269,6 @@ func (d date) isValid() bool {
 	if reflect.TypeOf(d.Day) == reflect.TypeOf("string") || reflect.TypeOf(d.Month) == reflect.TypeOf("string") || reflect.TypeOf(d.Year) == reflect.TypeOf("string") {
 		return false
 	}
-	fmt.Println(reflect.TypeOf(d.Day))
-	fmt.Println(reflect.TypeOf(d))
 	//do we have data of that year?
 	if _, ok := calendardata[d.Year]; !ok {
 		return false
