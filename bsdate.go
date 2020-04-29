@@ -2,7 +2,6 @@ package bsdate
 
 import (
 	"errors"
-	"reflect"
 	"time"
 )
 
