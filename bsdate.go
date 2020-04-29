@@ -206,7 +206,7 @@ func NewFromGregorian(gregorianDay, gregorianMonth, gregorianYear int) (Date, er
 		}
 	}
 	// is the year leap year? Leap year has 29 days in february
-	if gregorianYear % 4 == 0 &&  gregorianYear % 100 == 0 && gregorianYear % 400 == 0 {
+	if (gregorianYear % 4 == 0 &&  gregorianYear % 100 != 0) || gregorianYear % 400 == 0 {
 				if gregorianMonth == 2 && gregorianDay > 29 {
 					return nil, errors.New("cannot convert date, missing data")
 				}
