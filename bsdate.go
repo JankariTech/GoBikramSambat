@@ -196,24 +196,28 @@ func NewFromGregorian(gregorianDay, gregorianMonth, gregorianYear int) (Date, er
 	                                        // we use this value to check if the gregorian Date is in the actual BS month
 
 	if _, ok := calendardata[bsYear]; !ok {
-		return nil, errors.New("cannot convert date, missing data")
+		return nil, errors.New("cannot convert date, invalid or missing data")
 	}
 	// Months with 31 days
 	if gregorianMonth == 2 || gregorianMonth == 4 || gregorianMonth == 6 ||
 		gregorianMonth == 9 || gregorianMonth == 11 {
 		if gregorianDay > 30 {
-			return nil, errors.New("cannot convert date, missing data")
+			return nil, errors.New("cannot convert date, invalid or missing data")
 		}
 	}
 	// is the year leap year? Leap year has 29 days in february
 	if (gregorianYear%4 == 0 && gregorianYear%100 != 0) || gregorianYear%400 == 0 {
 		if gregorianMonth == 2 && gregorianDay > 29 {
-			return nil, errors.New("cannot convert date, missing data")
+			return nil, errors.New("cannot convert date, invalid or missing data")
 		}
 	} else {
 		if gregorianMonth == 2 && gregorianDay > 28 {
-			return nil, errors.New("cannot convert date, missing data")
+			return nil, errors.New("cannot convert date, invalid or missing data")
 		}
+	}
+
+	if gregorianMonth > 12 || gregorianDay > 31 {
+		return nil, errors.New("cannot convert date, invalid or missing data")
 	}
 
 	year := time.Date(gregorianYear, time.Month(gregorianMonth), gregorianDay, 0, 0, 0, 0, time.UTC)
@@ -241,7 +245,7 @@ func NewFromGregorian(gregorianDay, gregorianMonth, gregorianYear int) (Date, er
 			bsMonth = 1
 			bsYear++
 			if _, ok := calendardata[bsYear]; !ok {
-				return nil, errors.New("cannot convert date, missing data")
+				return nil, errors.New("cannot convert date, invalid or missing data")
 			}
 		}
 		daysSinceJanFirstToEndOfBsMonth += calendardata[bsYear][bsMonth]
@@ -323,7 +327,7 @@ func (d date) GetGregorianDate() (time.Time, error) {
 			nepaliYearToCheck--
 			//do we have data of that year?
 			if _, ok := calendardata[nepaliYearToCheck]; !ok {
-				return time.Time{}, errors.New("cannot convert date, missing data")
+				return time.Time{}, errors.New("cannot convert date, invalid or missing data")
 			}
 		}
 		daysAfterJanFirstOfGregorianYear += calendardata[nepaliYearToCheck][nepaliMonthToCheck]
