@@ -200,7 +200,8 @@ func NewFromGregorian(gregorianDay, gregorianMonth, gregorianYear int) (Date, er
 		return nil, errors.New("cannot convert date, missing data")
 	}
 	// Months with 31 days
-	if gregorianMonth == 2 || gregorianMonth == 4 || gregorianMonth == 6 || gregorianMonth == 9 || gregorianMonth == 11 {
+	if gregorianMonth == 2 || gregorianMonth == 4 || gregorianMonth == 6 ||
+		gregorianMonth == 9 || gregorianMonth == 11 {
 		if gregorianDay > 30 {
 			return nil, errors.New("cannot convert date, missing data")
 		}
