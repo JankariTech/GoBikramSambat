@@ -63,6 +63,7 @@ var invalidDates = []TestDateStruc{
 	{1, 1, "", 2101},   //no data after BS 2100
 	{32, 1, "", 2076},  //this month has only 31 days
 	{31, 12, "", 2067}, //this month has only 30 days
+	{30, 13, "", 2070},
 }
 
 var convertedDates = []TestDateConversionStruc{
@@ -89,6 +90,7 @@ var convertedDates = []TestDateConversionStruc{
 	{"2076-02-32", "2019-06-15"}, //end of a month with 32 days
 	{"2076-03-01", "2019-06-16"}, //a month after a month with 32 days
 	{"2100-12-30", "2044-04-12"}, //last day, we can convert in both directions
+	{"2076-11-18", "2020-03-01"},
 }
 func TestValidBSDates(t *testing.T) {
 	for _, testCase := range validDates {
@@ -167,7 +169,7 @@ func TestConversionInvalidToGregorian(t *testing.T) {
 			var convertedGregorianDate time.Time
 			convertedGregorianDate, err = nepaliDate.GetGregorianDate()
 			expectedGregorianDate, _ := time.Parse("2006-01-02", "0001-01-01")
-			assert.Equal(t, err.Error(), "cannot convert date, missing data")
+			assert.Equal(t, err.Error(), "cannot convert date, invalid or missing data")
 			assert.Equal(t, convertedGregorianDate, expectedGregorianDate)
 		})
 	}
@@ -193,6 +195,10 @@ var impossibleToConvertFromGregorianDates = [] string {
 	"2045-01-01", //2045 and after cannot be converted because 2045+56=2101 and we do not have data for that BS year
 	"2045-05-01",
 	"2044-04-13", //this date would be BS 2101-01-01  and we do not have data for that BS year
+	"2019-02-29",
+	"2019-13-22",
+	"2010-11-32",
+	"2020-02-30",
 }
 func TestCreateFromInvalidGregorian(t *testing.T) {
 	for _, testCase := range impossibleToConvertFromGregorianDates {
@@ -200,7 +206,7 @@ func TestCreateFromInvalidGregorian(t *testing.T) {
 
 			var gregorianYear, gregorianMonth, gregorianDay = splitDateString(testCase)
 			bsDate, err := NewFromGregorian(gregorianDay, gregorianMonth, gregorianYear)
-			assert.Equal(t, err.Error(), "cannot convert date, missing data")
+			assert.Equal(t, err.Error(), "cannot convert date, invalid or missing data")
 			assert.Equal(t, bsDate, nil)
 		})
 	}
